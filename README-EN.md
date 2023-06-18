@@ -1,7 +1,7 @@
-#Aluk-js
+# Aluk-js
 To view Chinese documents, please go to "READMEmd"
 Aluk is a library that is somewhat similar to Jquery and has many uses. Currently, it is version 1.2.1
-##Basic usage
+## Basic usage
 To use Aluk to search for DOM elements, you can do this:
 ```JavaScript
 Aluk (your attribute selector);
@@ -16,7 +16,7 @@ Alternatively, use aluk to convert individual elements into aluk's querylist obj
 ```JavaScript
 Aluk (document. body);
 ```
-##Advanced usage
+## Advanced usage
 Aluk comes with a set of functions and attributes that can be used
 The default Aluk language is English, and we can use 'aluk. language=' zh cn '` To change the current language of aluk, including error prompts
 But aluk only supports Chinese and English languages, so the attribute values are only 'en us' and' zh cn '
@@ -27,7 +27,7 @@ Var css='';
 Aluk.objectToCss ({"text align": "center", "color": "red"}). forEach (cssl=>{css+=cssl;})
 ```
 So, the content in the variable CSS is our CSS
-###Set CSS for Aluk objects
+### Set CSS for Aluk objects
 The usage of SetCss is as follows:
 ```JavaScript
 SetCss (index, cssList)
@@ -39,7 +39,7 @@ Var rtc=aluk('#rtc');
 //The first item below is represented by 0, the second item is represented by 1, and so on
 rtc.setCss (0, {"text align": "center", "color": "red"})// Set the CSS attribute on div rtc, which returns the number of rows in CSS
 ```
-###Move or append Aluk objects to elements
+### Move or append Aluk objects to elements
 The usage is as follows:
 ```JavaScript
 AppendorMoveto (index, appender)
