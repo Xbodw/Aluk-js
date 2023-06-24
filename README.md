@@ -2,7 +2,7 @@
 To view English documents, please go to “README-en.md”
 
 
-Aluk是一个有些类似于Jquery的库,它的用途也很多,目前是1.2.1版本
+Aluk是一个有些类似于Jquery的库,它的用途也很多,目前是1.4.2版本
 在线引用链接:
 <http://powernod.com/u/388c1af3a993eff1>
 ## 基本用法
