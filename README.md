@@ -108,5 +108,32 @@ aluk.WebUrlToBase64(url,callback)
 ```
 例如:
 ```javascript
-aluk.WebUrlToBase64('https://www.tiktok.com/favicon.ico',callback)
+aluk.WebUrlToBase64('https://path/to/url'，ce => {
+	console.log(ce)
+	})
+```
+
+## 多次搜索
+1.4.2更新
+用法如下:
+```javascript
+continue(select)
+```
+该操作对一个querylist对象使用continue函数,在对象内根据选择器搜索元素并返回一个新的querylist对象
+示例:
+```javascript
+const listdiv = aluk('div');
+const lista = listdiv.continue('a[id="b"]')  //根据原来的对象listdiv返回新的querylist对象lista
+```
+
+## 全部删除
+1.4.2更新
+原版的aluk(1.2.1)只能通过forEach函数进行逐次删除,于是我们更新了这个RemoveX函数:
+```javascript
+RemoveX()
+```
+具体用法如下
+```javascript
+const lista = aluk('div')
+lista.RemoveX(); //全部删除
 ```
