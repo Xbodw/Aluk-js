@@ -3,7 +3,8 @@ To view English documents, please go to “README-en.md”
 
 
 Aluk是一个有些类似于Jquery的库,它的用途也很多,目前是1.2.1版本
-
+在线引用链接:
+<http://powernod.com/u/388c1af3a993eff1>
 ## 基本用法
 
 要使用Aluk来搜索DOM元素,你可以这么做:
@@ -27,13 +28,13 @@ Aluk配套的一组函数和属性是可以使用的.
 
 默认的Aluk语言为英文,我们可以通过`aluk.language = 'zh-cn';`来改变aluk的当前语言,包括错误提示
 
-但是aluk只支持中文和英文两种语言.所以属性值只有`en-us`和`zh-cn`.
+但是aluk只支持中文和英文两种语言.所以属性值只有`en-us`和`zh-cn`。
 
  ### Object转Css
 你没听错,Aluk是可以将Object类型转换为Css的.
 ```javascript
 var css ='';
-aluk.objectToCss({"text-align":"center","color":"red"}).forEach(cssl => {css+=cssl;})
+aluk.objectToCss({"text-align":"center"，"color":"red"})。forEach(cssl => {css+=cssl;})
 ```
 这样,变量css里的内容就是我们的css了
 
@@ -47,7 +48,7 @@ SetCss(index,cssList)
 ```javascript
 var rtc = aluk('#rtc');
 //以下的第一项使用0来表示,第二项使用1,以此类推
-rtc.setCss(0,{"text-align":"center","color":"red"}); //对div rtc设置css属性,该操作会返回css的行数.
+rtc.setCss(0，{"text-align":"center"，"color":"red"}); //对div rtc设置css属性,该操作会返回css的行数.
 ```
  ### 移动或追加Aluk对象到元素
  用法如下:
@@ -71,15 +72,41 @@ aluk.createElementX(options)
 options是一个object对象,里面包含了对创建元素的要求
 createElementX返回一个Promise对象,其中的PromiseResult就是我们创建的元素.
 比如:
-  ```javascript
+```javascript
   var options = {
-    "ElementType":"div", //设置元素类型
-    "id":"a", //设置id,可写可不写,不写把这一行删掉
-    "Class":"b", //设置Class,也是可写可不写,不写把这一行删掉
+    "ElementType":"div"， //设置元素类型
+    "id":"a"， //设置id,可写可不写,不写把这一行删掉
+    "Class":"b"， //设置Class,也是可写可不写,不写把这一行删掉
     "innerHTML":"<a>&nbsp:123</a>"
     }; //设置innerHTML,按需求可以填可以不填,不写把这一行删掉
     
     var element;
-    aluk.createElementX(options).then(res => element=res);
-    ```
+    aluk.createElementX(options)。then(res => element=res);
+```
 
+### 在控制台上显示图片
+我们在1.4.2更新了这个函数,具体用法如下:
+```javascript
+aluk.ShowConsolePictures(url,options)
+```
+其中,url可以为网络https或http链接,也可以为base64链接
+
+比如可以这么用:
+```javascript
+aluk.ShowConsolePictures(`https://file/path/to/png`，{
+    size: "1200"，
+    height: "600" //百分比,控制台给的空间小,所有必须大于100%
+})
+```
+这样,就能把图片清晰的显示在控制台上
+
+### 转换网络链接为Base64
+1.4.2更新
+用法:
+```javascript
+aluk.WebUrlToBase64(url,callback)
+```
+例如:
+```javascript
+aluk.WebUrlToBase64('https://www.tiktok.com/favicon.ico',callback)
+```
