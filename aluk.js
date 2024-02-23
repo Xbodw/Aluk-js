@@ -6,12 +6,17 @@
     Linense MIT
 */
 
-var aluk = function (s, m, e) {
+/**
+ * @param {*} s - Selector
+ * @param {*} [m] - Mode
+ * @param {*} [e] - The base object
+ */
+var aluk = (s, m, e) => {
     return new querylist(s, m, e);
 };
 var al = {
     fn: {
-        ajax: function (o, method) {
+        request: (o, method) => {
             if (!o) {
                 o = { promise: false, url: '' }
             }
@@ -21,8 +26,8 @@ var al = {
                     let url = new URL(o.url);
                     let param = url.searchParams;
                     let callback = aluk.generateRandomFunctionName();
-                    if(!(param.get('callback'))) {
-                        param.set('callback',callback);
+                    if (!(param.get('callback'))) {
+                        param.set('callback', callback);
                     }
                     script.src = url.href;
                     window[callback] = function (data) {
@@ -57,14 +62,14 @@ var al = {
                             xhr.setRequestHeader(header, o.headers[header]);
                         }
                     }
-                    xhr.onload = function () {
+                    xhr.onload = () => {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             resolve(xhr.response);
                         } else {
                             reject(xhr.statusText);
                         }
                     };
-                    xhr.onerror = function () {
+                    xhr.onerror = () => {
                         reject(xhr.statusText);
                     };
                     xhr.send(o.body);
@@ -73,8 +78,7 @@ var al = {
         }
     }
 }
-al.fn.ajax.prototype = new Array();
-aluk.version = '1.4.8';
+aluk.version = '1.5.1';
 aluk.language = 'zh-cn';
 
 aluk.generateRandomFunctionName = () => {
@@ -87,26 +91,53 @@ aluk.generateRandomFunctionName = () => {
     return randomFunctionName;
 }
 
-querylist = function (selector) {
+/**
+ * @param {*} s - Selector
+ * @param {*} [m] - Mode
+ * @param {*} [e] - The base object
+ */
+function querylist(s, m = {}, e = document) {
     var ce;
-    if (selector == '' || selector == undefined) {
+
+    if (s == '' || s == undefined) {
         ce = '';
         return;
     }
-    if (typeof (selector) == 'string' && aluk.checkHtml(selector) === false) {
-        ce = document.querySelectorAll(selector);
+    if (typeof (s) == 'string' && aluk.checkHtml(s) === false) {
+        try {
+            ce = e.querySelectorAll(s);
+        } catch (ex) {
+            ce = e;
+            throw new Error("Failed to execute aluk(s,m,e): selector is undefined or Query Failed")
+        }
+
     } else {
-        if (typeof (selector) == 'number') {
+        if (typeof (s) == 'number') {
             ce = '';
         } else {
-            if (typeof (selector) == 'object') {
-                ce = new Array(selector);
+            if (typeof (s) == 'object') {
+                ce = new Array(s);
             } else {
-                if (aluk.checkHtml(selector) === true) {
-                    ce = new Array(aluk.htmlToElement(selector));
+                if (aluk.checkHtml(s) === true) {
+                    ce = new Array(aluk.htmlToElement(s));
                 }
             }
         }
+    }
+    if (m.shadowroot == true) {
+        ce = Array.from(ce).reduce((acc, curr) => {
+            acc.push(curr);
+            if (curr.shadowRoot) {
+                let shadowRootElements = curr.shadowRoot.querySelectorAll('*');
+                acc.push(...shadowRootElements);
+                shadowRootElements.forEach(element => {
+                    let nestedShadowRootElements = queryShadowRoots(element);
+                    acc.push(...nestedShadowRootElements);
+                });
+            }
+            return acc;
+        }, []);
+
     }
     if (ce.length > 1) {
         ce.forEach(element => {
@@ -117,11 +148,73 @@ querylist = function (selector) {
             this.push(ce[0]);
         }
     }
-    var fn = this;
+
     this.NormalResult = document;
 }
 
+
+function queryShadowRoots(element) {
+    if (element.shadowRoot) {
+        let elements = element.shadowRoot.querySelectorAll('*');
+        let result = Array.from(elements);
+        elements.forEach(el => {
+            let nestedShadowRootElements = queryShadowRoots(el);
+            result.push(...nestedShadowRootElements);
+        });
+        return result;
+    } else {
+        return [];
+    }
+}
+
+/*
+function querylist(s,m = {},e = document) {
+    var ce;
+    if (s == '' || s == undefined) {
+        ce = '';
+        return;
+    }
+    if (typeof (s) == 'string' && aluk.checkHtml(s) === false) {
+        try {
+            ce = e.querySelectorAll(s);
+        } catch(ex) {
+            ce = e;
+            throw new Error("Failed to execute aluk(s,m,e): selector is undefined or Query Failed")
+        }
+        
+    } else {
+        if (typeof (s) == 'number') {
+            ce = '';
+        } else {
+            if (typeof (s) == 'object') {
+                ce = new Array(s);
+            } else {
+                if (aluk.checkHtml(s) === true) {
+                    ce = new Array(aluk.htmlToElement(s));
+                }
+            }
+        }
+    }
+    if(m.shadowroot == true) {
+        ce = [];
+        
+    }
+    if (ce.length > 1) {
+        ce.forEach(element => {
+            this.push(element);
+        });
+    } else {
+        if (ce.length > 0) {
+            this.push(ce[0]);
+        }
+    }
+    
+    this.NormalResult = document;
+}
+*/
+
 querylist.prototype = new Array();
+
 querylist.prototype.createChildElement = function (index, options) {
     if (typeof (options) != 'object') {
         if (aluk.language != 'zh-cn') {
@@ -166,8 +259,8 @@ querylist.prototype.createChildElement = function (index, options) {
     return Promise.resolve(this[index]);
 }
 
-aluk.objectToCss = function (obj) {
-    return Object.entries(obj)
+aluk.objectToCss = function (o, m = {}) {
+    return Object.entries(o)
         .map(([key, value]) => `${key}: ${value};`)
     //.join('\n');
 }
@@ -247,7 +340,7 @@ querylist.prototype.continue = function (s) {
     var newe = [];
 
     for (var i = 0; i < this.length; i++) {
-        var m = this[i].querySelectorAll(s);
+        var m = aluk(s,{},this[i]);
         newe.push(m);
     }
     var n = new querylist('<null>');
@@ -312,11 +405,59 @@ querylist.prototype.Prep = function (call) {
     });
 }
 
-aluk.isHtmlElement = function (variable) {
+querylist.prototype.event = (o,s,t) => {
+    if(typeof (o) == 'number') {
+        if(this.length > 0) {
+            this[o].addEventListener(s,t);
+        } else {
+            throw new Error('Failed to event(o,s,t): Beyond the bounds of an array')
+        }
+    } else {
+        if(this.length > 1) {
+            this.forEach(element => {
+                element.addEventListener(o,s);
+            })
+        } else {
+            if(this.length > 0) {
+                this[0].addEventListener(o,s);
+            }
+        }
+    }
+}
+
+querylist.prototype.hide = (i) => {
+    if(typeof(i) == 'undefined') {
+        if(this.length > 1) {
+            this.forEach(e => {
+                e.SetCss({'display' : 'none'});
+            })
+        } else {
+            this[0].SetCss({'display' : 'none'});
+        }
+    } else {
+        this[i].SetCss({'display' : 'none'});
+    }
+}
+
+querylist.prototype.show = (i) => {
+    if(typeof(i) == 'undefined') {
+        if(this.length > 1) {
+            this.forEach(e => {
+                e.SetCss({'display' : ''});
+            })
+        } else {
+            this[0].SetCss({'display' : ''});
+        }
+    } else {
+        this[i].SetCss({'display' : ''});
+    }
+}
+
+aluk.isHtmlElement = (variable) => {
     return variable instanceof Element || variable instanceof HTMLElement;
 }
 
-aluk.createElementX = function (options) {
+aluk.createElementX = (options) => {
     if (typeof (options) != 'object') {
         if (aluk.language != 'zh-cn') {
             throw new Error('Element Options Type Must as the Object');
@@ -359,7 +500,7 @@ aluk.createElementX = function (options) {
     return aluk(result);
 }
 
-aluk.htmlEscape = function (htmlStr) {
+aluk.htmlEscape = (htmlStr) => {
     return htmlStr.replace(/<|>|"|&/g, match => {
         switch (match) {
             case '<':
@@ -373,7 +514,7 @@ aluk.htmlEscape = function (htmlStr) {
         }
     })
 }
-aluk.htmlUnescape = function (html) {
+aluk.htmlUnescape = (html) => {
     return html.replace(/&lt;|&gt;|&quot;|&amp;/g, match => {
         switch (match) {
             case '&lt;':
@@ -389,7 +530,7 @@ aluk.htmlUnescape = function (html) {
 }
 
 
-aluk.appendHTMLX = function (appender, element, options) {
+aluk.appendHTMLX = (appender, element, options) => {
     if (appender == undefined) {
         if (aluk.language != 'zh-cn') {
             throw new Error('AppendElement name not specified or empty')
@@ -422,14 +563,14 @@ aluk.appendHTMLX = function (appender, element, options) {
     return Promise.resolve(appender.innerHTML);
 }
 
-aluk.checkHtml = function (htmlStr) {
+aluk.checkHtml = (htmlStr) => {
 
     var reg = /<[a-z][\s\S]*>/i;
 
     return reg.test(htmlStr);
 
 }
-aluk.htmlToElement = function (html) {
+aluk.htmlToElement = (html) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     return doc.body.firstChild;
@@ -461,14 +602,11 @@ aluk.WebUrlToBase64 = function (url, callback) {
 
 
 
-aluk.ajax = function (o) {
+aluk.ajax = (o) => {
     return new al.fn.ajax(o, o.method);
 }
 
-
-
-
-aluk.encodeX = function (code, key) {
+aluk.encodeX = (code, key = 0) => {
     var keys;
     if (key == undefined) {
         keys = '0';
@@ -484,13 +622,13 @@ aluk.encodeX = function (code, key) {
     var codea = window.btoa(window.encodeURI(codeb));
     var lista = [];
     for (var i = 0; i < codea.length; i++) {
-        var asciic = escape(codea.charCodeAt(i)).replace(/\%u/g, '/u');
+        var asciic = escape(codea.charCodeAt(i) + key).replace(/\%u/g, '/u');
         lista.push(asciic);
     } return lista;
 }
 
 
-aluk.decodeX = function (code, key) {
+aluk.decodeX = (code, key = 0) => {
     if (!Array.isArray(code)) { return }
     var keys;
     if (key == undefined) {
@@ -501,7 +639,7 @@ aluk.decodeX = function (code, key) {
     var result = '';
     var resultb = '';
     code.forEach(e => {
-        var sh = unescape(String.fromCharCode(e)).replace(/\/u/g, '%u');
+        var sh = unescape(String.fromCharCode(e - key)).replace(/\/u/g, '%u');
         resultb += sh;
     })
     result = window.decodeURI(window.atob(resultb));
@@ -513,7 +651,9 @@ Terminal = function (output) {
     }
     this.Resultelement = output;
 }
+
 TerminalAPI = function () { return this; };
+
 var API = undefined;
 var consolebak = undefined;
 function InTerminal(e) {
